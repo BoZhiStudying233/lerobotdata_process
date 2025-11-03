@@ -131,11 +131,11 @@ meta = {
         },
         "state": { 
             "dtype": "float32",
-            "shape": [7]
+            "shape": [6]
         },
         "action": { 
             "dtype": "float32",
-            "shape": [7]
+            "shape": [6]
         },
         "frame_index": { 
             "dtype": "int32",
