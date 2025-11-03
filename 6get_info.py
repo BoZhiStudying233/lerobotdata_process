@@ -87,14 +87,14 @@ cap.release()
 
 # 6. 构造 meta.json
 meta = {
-    "codebase_version": "v2.1",
+    "codebase_version": "v2.0",
     "robot_type": "UAV",
     "total_episodes": total_episodes+1,
     "total_frames": total_frames+1,
     "total_tasks": total_tasks,
     "total_videos": total_videos,
     "total_chunks": total_chunks,
-    "chunks_size": 30,
+    "chunks_size": 29,
     "fps": int(fps),
     "splits": {
         "train": f"0:{total_episodes+1}"
