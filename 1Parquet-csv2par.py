@@ -112,6 +112,10 @@ for type_idx, type_folder in enumerate(task_type_folders):
 
         merged_df = pd.concat(all_data, ignore_index=True)
 
+        #下采样
+        sample_interval = 2
+        merged_df = merged_df.iloc[::sample_interval].reset_index(drop=True)
+        
         # ---------- 先转换四元数为欧拉角，再归一化，再合并 ----------
         p0 = np.array([
             merged_df["位置X"].iloc[0],
@@ -179,20 +183,21 @@ for type_idx, type_folder in enumerate(task_type_folders):
         merged_df["index"] = range(global_frame_index, global_frame_index + len(merged_df))
         global_frame_index += len(merged_df)
         merged_df["episode_index"] = episode_index
-        merged_df["timestamp"] = np.arange(len(merged_df)) * 0.2
+        merged_df["timestamp"] = np.arange(len(merged_df)) * 0.2 * sample_interval
         merged_df["task_index"] = task_index
 
         merged_df = merged_df[["index", "episode_index", "frame_index", "timestamp", "task_index", "state", "action", "bbox", "grasp"]]
         
-        # ---------- 下采样 ----------
-
-        sample_interval = 1
-        sampled_df = merged_df.iloc[::sample_interval].reset_index(drop=True)
-        merged_df = sampled_df
+        # # ---------- 下采样: 每 1 秒保留一帧 ----------
+        # # timestamp 是 0.0, 0.2, 0.4, 0.6, ...
+        # # 因此每隔 5 帧取一帧即可 (1.0s / 0.2s = 5)
+        # sample_interval = 1
+        # sampled_df = merged_df.iloc[::sample_interval].reset_index(drop=True)
+        # merged_df = sampled_df
 
 
         parquet_file = os.path.join(chunk_folder, f"episode_{episode_index:06d}.parquet")
-        sampled_df.to_parquet(parquet_file, engine="pyarrow", index=False)
+        merged_df.to_parquet(parquet_file, engine="pyarrow", index=False)
 
         print(f"✅ 已生成长程任务 {task_folder} 的 parquet 文件: {parquet_file}, 帧数={len(merged_df)}")
 
