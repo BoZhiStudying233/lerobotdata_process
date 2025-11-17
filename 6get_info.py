@@ -26,7 +26,12 @@ total_chunks = len(chunk_dirs)
 
 if total_chunks == 0:
     raise RuntimeError("❌ 没有找到任何 chunk 文件夹")
-
+# 1.1 计算 chunk_size（每个 chunk 中 parquet 文件数量）
+first_chunk = os.path.join(data_root, chunk_dirs[0])
+first_chunk_parquet_files = sorted(glob.glob(os.path.join(first_chunk, "*.parquet")))
+if not first_chunk_parquet_files:
+    raise RuntimeError(f"❌ {first_chunk} 中没有 parquet 文件")
+chunk_size = len(first_chunk_parquet_files)
 # 2. 找最后一个 chunk 的最后一个 parquet 文件
 last_chunk = os.path.join(data_root, chunk_dirs[-1])
 parquet_files = sorted(glob.glob(os.path.join(last_chunk, "*.parquet")))
@@ -94,7 +99,7 @@ meta = {
     "total_tasks": total_tasks,
     "total_videos": total_videos,
     "total_chunks": total_chunks,
-    "chunks_size": 29,
+    "chunks_size": chunk_size,
     "fps": int(fps),
     "splits": {
         "train": f"0:{total_episodes+1}"
@@ -171,3 +176,31 @@ with open(output, "w", encoding="utf-8") as f:
 
 print(f"✅ 已生成 info.json")
 print(f"    total_chunks={total_chunks}, total_episodes={total_episodes}, total_frames={total_frames}, total_videos={total_videos}, total_tasks={total_tasks}")
+
+
+
+'''
+"video.front_first": {
+            "dtype": "video",
+            "shape": [
+                height,
+                width,
+                channels
+            ],
+            "names": [
+                "height",
+                "width",
+                "channels"
+            ],
+            "info": {
+                "video.fps": float(fps),
+                "video.height": height,
+                "video.width": width,
+                "video.channels": channels,
+                "video.codec": "mpeg4",       # 默认写 mpeg4
+                "video.pix_fmt": "yuv420p",  # 默认写 yuv420p
+                "video.is_depth_map": False,
+                "has_audio": False
+            }
+        },
+'''

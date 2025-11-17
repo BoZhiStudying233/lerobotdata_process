@@ -12,10 +12,6 @@ args = parser.parse_args()
 # 从命令行参数获取路径
 root_dir = args.root_dir
 output_dir = args.output_dir
-# # 根目录
-# root_dir = r"/data2/konghanlin/internmanip/data/datasets/our_reorganized_data"
-# # 输出目录
-# output_dir = r"/data2/konghanlin/internmanip/data/datasets/output_small/videos"
 os.makedirs(output_dir, exist_ok=True)
 
 episode_counter = 0  # 全局计数器
@@ -49,7 +45,6 @@ for a_folder in natsorted(os.listdir(root_dir)):
             if not os.path.exists(c_path):
                 continue
             
-            # print("c_path:",c_path)
             # 按自然顺序排序图片
             images = natsorted([
                 os.path.join(c_path, f)
@@ -72,7 +67,14 @@ for a_folder in natsorted(os.listdir(root_dir)):
         folder_path = os.path.join(chunk_output_dir, folder_name)
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
-        video_path = os.path.join(chunk_output_dir,folder_name,video_name)
+        video_path = os.path.join(chunk_output_dir, folder_name, video_name)
+
+        # 新增：首帧视频的输出目录与路径（文件名与原视频相同，目录不同）
+        first_folder_name = "video.front_first"                                   # 新增
+        first_folder_path = os.path.join(chunk_output_dir, first_folder_name)      # 新增
+        if not os.path.exists(first_folder_path):                                  # 新增
+            os.mkdir(first_folder_path)                                            # 新增
+        first_video_path = os.path.join(first_folder_path, video_name)             # 新增
         
         # 保存视频
         out = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc(*"mp4v"), 5, (width, height))
@@ -81,5 +83,13 @@ for a_folder in natsorted(os.listdir(root_dir)):
             out.write(img)
         out.release()
         
+        # 新增：保存首帧视频 —— 帧数与原视频一致（len(all_images)），fps 保持 5，因而总时长一致
+        frame_count = len(all_images)                                              # 新增
+        first_out = cv2.VideoWriter(first_video_path, cv2.VideoWriter_fourcc(*"mp4v"), 5, (width, height))  # 新增
+        for _ in range(frame_count):                                               # 新增
+            first_out.write(first_img)                                             # 新增
+        first_out.release()                                                        # 新增
+        
         print(f"生成视频: {video_path}")
+        print(f"生成首帧视频: {first_video_path}")                                  # 新增
         episode_counter += 1  # 递增
